@@ -119,33 +119,45 @@ public class BasicOpMode_Linear extends OpMode
      */
     @Override
     public void loop() {
+        
         // Setup a variable for each drive wheel to save power level for telemetry
         double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+        // ^ desired robot movement magnitude / speed - player 2 left joy stick distance from center
         double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+        // ^ desired robot movement direction (angle)
         double rightX = gamepad1.right_stick_x;
-        final double v1 = r * Math.cos(robotAngle) + rightX;
-        final double v2 = r * Math.sin(robotAngle) - rightX;
-        final double v3 = r * Math.sin(robotAngle) + rightX;
-        final double v4 = r * Math.cos(robotAngle) - rightX;
+        // ^ x coord of right joystick of p1 - desired robot rotation direction & magnitude
+        
+        // calculate power of each motor needed to achieve desired robot motion/rotation
+        final double m1 = r * Math.cos(robotAngle) + rightX;
+        final double m2 = r * Math.sin(robotAngle) - rightX;
+        final double m3 = r * Math.sin(robotAngle) + rightX;
+        final double m4 = r * Math.cos(robotAngle) - rightX;
 
-        forwardLeft.setPower(v1);
-        forwardRight.setPower(v2);
-        backwardLeft.setPower(v3);
-        backwardRight.setPower(v4);
+        // apply calculated powers to each motor
+        forwardLeft.setPower(m1);
+        forwardRight.setPower(m2);
+        backwardLeft.setPower(m3);
+        backwardRight.setPower(m4);
 
+        // carousel rotate-inator control - controlled by player 2
         if(gamepad2.left_bumper) {
+            // if left bumper depressed, rotate both motors counter-clockwise
             carouselLeft.setPower(1);
             carouselRight.setPower(1);
         }
         if(gamepad2.right_bumper) {
+            // if right bumper depressed, rotate both motors clockwise
             carouselLeft.setPower(-1);
             carouselRight.setPower(-1);
         }
         if(!gamepad2.right_bumper && !gamepad2.left_bumper) {
+            // if both bumpers unpressed, unpower both motors
             carouselLeft.setPower(0);
             carouselRight.setPower(0);
         }
 
+        // arm control
         arm.setPower(gamepad2.left_stick_y);
 
         // Show the elapsed game time and wheel power.
